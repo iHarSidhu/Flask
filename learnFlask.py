@@ -1,1 +1,0 @@
-from learnFlaskApp import app
