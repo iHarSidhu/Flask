@@ -1,0 +1,110 @@
+Chapter 2 – Part 2: Passing Data to Templates (Dynamic Content)
+
+In Part 1, our HTML page was static.
+Now we make it dynamic by sending data from Python to HTML.
+
+templates/index.html
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Flask Page</title>
+      </head>
+      <body>
+          <h1>{{ info.heading }}</h1>
+          <p>{{ other }}</p>
+      </body>
+      </html>
+
+What Are {{ }} ?
+The double curly braces:  {{ variable }}
+are part of Jinja2, Flask’s template engine.
+
+Jinja allows us to:
+• Insert Python variables into HTML
+• Use logic (if, for, etc.)
+• Build dynamic pages
+
+So anything inside {{ }} is replaced with actual data before the page is sent to the browser.
+
+Updated routes.py
+      @app.route('/')
+      def index():
+          info = { 'heading': 'This is Flask index page' }
+          return render_template(
+              'index.html',
+              other='This is a kind of paragraph',
+              info=info
+          )
+
+What Is Happening Here?
+# Step 1 — Create Data in Python
+      info = { 'heading': 'This is Flask index page' }
+
+This is a Python dictionary.
+It contains: 
+Key    → 'heading'
+Value  → 'This is Flask index page'
+
+# Step 2 — Send Data to Template
+      render_template('index.html', other='This is a kind of paragraph', info=info)
+
+Everything after 'index.html' becomes variables inside the template.
+
+So we are sending:
+Template Variable	Value
+      other    "This is a kind of paragraph"
+      info    { 'heading': 'This is Flask index page' }
+
+How Template Uses This Data
+Inside HTML:
+      <h1>{{ info.heading }}</h1>
+Jinja reads:
+info     → dictionary
+heading  → key inside dictionary
+So it becomes:
+      <h1>This is Flask index page</h1>
+
+Next:
+      <p>{{ other }}</p>
+This becomes:
+      <p>This is a kind of paragraph</p>
+
+Complete Execution Flow
+Browser → '/' route
+        ↓
+index() runs
+        ↓
+Create dictionary info
+        ↓
+Call render_template()
+        ↓
+Jinja replaces {{ variables }}
+        ↓
+Final HTML sent to browser
+
+Important Concept
+You are NOT writing Python inside HTML.
+Instead: Python creates data.
+
+Flask sends data to template.
+Jinja inserts data into HTML.
+Browser receives final pure HTML.
+
+The browser never sees:
+      {{ info.heading }}
+It only sees the final rendered result.
+
+Why This Is Powerful
+Now you can:
+• Pull data from database
+• Show user names
+• Display dynamic content
+• Build dashboards
+• Create real applications
+
+Mental Model
+Python (Backend)    HTML (Frontend)
+Creates data        Displays data
+info = {...}        {{ info.heading }}
+render_template()   Receives variables
+
