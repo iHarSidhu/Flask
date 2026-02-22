@@ -1,0 +1,168 @@
+Chapter 2 – Part 5: Creating Multiple Pages and Navigation
+
+Now our application has:
+• Two templates
+• Two routes
+• Links between pages
+
+This is how real websites work.
+
+Project Structure Now
+learnFlaskApp/
+├── __init__.py
+├── routes.py
+└── templates/
+    ├── index.html
+    └── newPage.html
+
+Updated routes.py
+      from learnFlaskApp import app
+      from flask import render_template
+      
+      @app.route('/')
+      @app.route('/index/<int:count>')
+      def index(count=0):
+          info = { 'heading': 'This is Flask index page' }
+          return render_template(
+              'index.html',
+              other='This is a kind of paragraph',
+              info=info,
+              count=count
+          )
+      
+      @app.route('/profile')
+      def profileRoute():
+          info = { 'heading': 'This is Profile page' }
+          return render_template(
+              'newPage.html',
+              other='Welcome to the new page!',
+              info=info
+          )
+
+index.html
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Flask Page</title>
+      </head>
+      <body>
+          <a href="/profile">New Page</a>
+          <hr>
+          <h1>{{ info.heading }}</h1>
+          <p>{{ other }}</p>
+          <hr>
+          <p>{{ count }}</p>
+      </body>
+      </html>
+
+newPage.html
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Flask Page</title>
+      </head>
+      <body>
+          <a href="/">Index</a>
+          <hr>
+          <h1>{{ info.heading }}</h1>
+          <p>{{ other }}</p>
+          <hr>
+          <p>{{ count }}</p>
+      </body>
+      </html>
+
+What Is Happening Now?
+Two Different URLs
+URL	Function	Template
+/	index()   index.html
+/profile    profileRoute()	newPage.html
+
+Each route renders a different HTML page.
+
+Navigation Between Pages
+Inside index.html:
+      <a href="/profile">New Page</a>
+
+Clicking this link:
+Sends request to /profile
+Calls profileRoute()
+Renders newPage.html
+Inside newPage.html:
+      <a href="/">Index</a>
+
+Clicking this link:
+Sends request to /
+Calls index()
+Renders index.html
+This is basic page navigation.
+
+Full Execution Flow
+User starts at:
+      http://127.0.0.1:5000/
+Click “New Page”
+Browser → /profile
+        ↓
+profileRoute()
+        ↓
+render_template('newPage.html')
+        ↓
+HTML returned
+
+Click “Index”
+Browser → /
+        ↓
+index()
+        ↓
+render_template('index.html')
+
+Important Observation
+In newPage.html, we have:
+      <p>{{ count }}</p>
+
+But in profileRoute() we are NOT sending count.
+So:
+      return render_template(
+          'newPage.html',
+          other='Welcome to the new page!',
+          info=info
+      )
+
+There is no count variable here.
+Flask will render count as empty.
+
+Best Practice Fix
+Either:
+Option 1 — Remove count from newPage.html
+OR
+Option 2 — Send a default value:
+      return render_template(
+          'newPage.html',
+          other='Welcome to the new page!',
+          info=info,
+          count=0
+      )
+
+Important Concept Learned Here
+We now understand:
+• Multiple routes
+• Multiple templates
+• Page navigation
+• Data passing
+• Dynamic routes
+• Default parameters
+
+This is already the foundation of real applications.
+
+Improvement (Very Important)
+Instead of hardcoding:
+      <a href="/profile">
+We should use:
+      <a href="{{ url_for('profileRoute') }}">
+Why?
+Because if we change the route later, links won’t break.
+
+This is professional Flask style.
+
+Mental Model
+Route → Function → Template → Link → Another Route
+
