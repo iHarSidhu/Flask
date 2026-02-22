@@ -1,0 +1,111 @@
+Chapter 2 – Part 1: Using Templates in Flask
+
+In Chapter 1, our route returned simple text:
+      return 'My First Flask Page'
+
+Now we improve it.
+Instead of returning plain text, we return an HTML page.
+
+# Step 1 — Create Templates Folder
+Inside learnFlaskApp/, we created a new folder:
+
+learnFlaskApp/
+│
+├── __init__.py
+├── routes.py
+└── templates/
+    └── index.html
+
+Important: 
+The folder must be named exactly: templates
+Flask automatically looks for HTML files inside a folder named templates.
+
+# Step 2 — Create index.html
+Inside the templates folder, we created: index.html
+
+Example content:
+
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>Flask Page</title>
+      </head>
+      <body>
+          <h1>This is Flask index page</h1>
+      </body>
+      </html>
+
+This is a normal HTML file.
+There is nothing Flask-specific here yet.
+
+# Step 3 — Modify routes.py
+
+Before:
+
+      @app.route('/')
+      def index():
+          return 'My First Flask Page'
+      
+      Now we import render_template:
+      
+      from flask import render_template
+
+And modify the route:
+
+      @app.route('/')
+      def index():
+          return render_template('index.html')
+
+What is render_template()?
+render_template() is a Flask function that:
+• Looks inside the templates folder
+• Finds the HTML file
+• Processes it
+• Sends it to the browser
+
+So when someone visits:
+      http://127.0.0.1:5000/
+
+Flask:
+      Calls index()
+
+Executes render_template('index.html')
+Loads the file from templates/index.html
+Sends the full HTML page to the browser
+
+Execution Flow Now
+Browser → '/' route
+        ↓
+index() function
+        ↓
+render_template('index.html')
+        ↓
+Load file from templates/
+        ↓
+Send HTML to browser
+
+Why We Use Templates
+Returning plain text is fine for testing, but real websites use:
+• HTML
+• CSS
+• JavaScript
+
+Templates allow us to:
+• Build real web pages
+• Add design
+• Add layout
+• Later pass dynamic data
+
+This is the first step toward real web development.
+
+Important Rule
+Flask automatically searches for:
+project_name/templates/
+If you rename the folder (like template or html), Flask will not find your files unless you configure it manually.
+
+Mental Model
+Old Way            New Way
+Return plain text  Return full HTML page
+Simple response    Real webpage
+return 'text'      return render_template('file.html')
+

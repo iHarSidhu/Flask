@@ -1,0 +1,112 @@
+Installation
+> mkdir Flask
+> cd Flask
+> py -3 -m venv .venv
+> .venv\Scripts\activate
+This means environment is activated (.venv) ...\Flask>
+> pip install Flask
+> python.exe -m pip install --upgrade pip
+
+Copy the files located in Chapter01 in Flask folder as created above.
+
+01: Understanding Basic Flask Project Structure
+Flask/
+├── learnFlask/
+	├── learnFlask.py
+	└── learnFlaskApp/
+    	├── __init__.py
+    	└── routes.py
+	
+
+This is called the Application Package Structure.
+Instead of putting everything in one file, we split it into modules.
+-----------------------------------------------
+After going below, follow this to test the app;
+-----------------------------------------------
+> $env:FLASK_APP="learnFlask.py"
+> flask run
+
+    * Serving Flask app 'learnFlask.py'
+    * Debug mode: off
+        WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+    * Running on http://127.0.0.1:5000
+        Press CTRL+C to quit
+-----------------------------------------------
+
+# 01: learnFlaskApp/__init__.py
+
+      from flask import Flask
+          
+      app = Flask(__name__)
+      from learnFlaskApp import routes
+
+What is happening here?
+      from flask import Flask
+
+We import the Flask class.
+Flask is the main object that creates our web application.
+
+      app = Flask(__name__)
+
+This creates the Flask application instance.
+Think of it as: “Create a new website application”
+
+__name__ tells Flask where the application is located.
+It helps Flask find: Templates, Static files, Resources
+
+from learnFlaskApp import routes
+
+This line is VERY IMPORTANT.
+It imports the routes.py file.
+
+Why?
+Because our routes (URLs) are defined inside routes.py.
+If we do not import it, Flask will never know those routes exist.
+
+Important:
+This import must be at the bottom.
+Otherwise, circular import errors may happen.
+	
+# 02: learnFlaskApp/routes.py
+
+      from learnFlaskApp import app
+          
+      @app.route('/')
+      def index():
+          return 'My First Flask Page'
+
+What is happening here?
+      from learnFlaskApp import app
+
+We import the app object created in __init__.py.
+We need this so we can attach routes to the app.
+
+      @app.route('/')
+This is a decorator.
+It tells Flask:
+“When someone visits the homepage /, run the function below.”
+'/' means:
+•	Root URL
+•	Home page
+
+      def index():
+This function runs when someone visits /.
+
+      return 'My First Flask Page'
+Flask sends this text as a response to the browser.
+
+
+# 03: learnFlaskApp/learnFlask.py
+      from learnFlaskApp import app
+
+Why does this file exist?
+This is the entry point of the application.
+	
+learnFlask.py
+↓
+learnFlaskApp/__init__.py
+↓
+learnFlaskApp/routes.py
+
+Everything gets connected.
+

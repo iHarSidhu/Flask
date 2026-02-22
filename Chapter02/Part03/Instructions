@@ -1,0 +1,69 @@
+Chapter 2 – Part 3: Multiple Routes for One View Function
+
+Updated routes.py:
+      from learnFlaskApp import app
+      from flask import render_template
+      
+      @app.route('/')
+      @app.route('/index')
+      def index():
+          info = { 'heading': 'This is Flask index page' }
+          return render_template('index.html', other='This is a kind of paragraph', info=info)
+
+What Changed?
+We added:
+      @app.route('/index')
+Now the same function responds to two different URLs.
+
+What Is a Route?
+A route connects: URL  →  Python function
+Example:
+URL	Function Called
+/        → index()
+/index   → index()
+Both URLs now run the same function.
+
+Execution Flow
+If user visits:
+      http://127.0.0.1:5000/
+OR
+      http://127.0.0.1:5000/index
+Flask: Matches the route
+Calls index()
+Sends rendered template
+
+Why Use Multiple Routes?
+This is useful when:
+• You want homepage available as / and /index
+• You want backward compatibility
+• You want cleaner URLs
+• You migrate old URLs
+
+Many professional apps do this.
+
+How It Works Internally
+When Flask starts:
+It registers both routes separately:
+'/'      → index()
+'/index' → index()
+But both point to the same function in memory.
+So the logic is written once, reused twice.
+
+Important Rule
+Decorators stack upward.
+This means:
+      @app.route('/')
+      @app.route('/index')
+      def index():
+Is interpreted as:
+Register /index
+Register /
+Then attach to index()
+
+Both decorators apply to the same function.
+
+Mental Model
+Think of it like:
+Two doors → Same room
+Different URLs, same logic, same template.
+
