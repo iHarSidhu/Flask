@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flask Page</title>
+</head>
+<body>
+    <ul>
+        <li><a href="{{ url_for('index') }}"> Index </a></li>
+        <li><a href="{{ url_for('profileRoute', count=39) }}"> Profile </a></li>
+        <li><a href="{{ url_for('queryStringRoute', qryInt=2556) }}"> Query String </a></li>
+        <li><a href="{{ url_for('countQuery', count=71, qryStr=8443) }}"> Count & Query </a></li>
+    </ul>
+    <hr>
+    <h1>{{ info.heading }}</h1>
+    <p>{{ other }}</p>
+</body>
+</html>
