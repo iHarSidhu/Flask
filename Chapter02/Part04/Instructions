@@ -1,0 +1,124 @@
+Chapter 2 – Part 4: Dynamic Routes with URL Parameters
+
+Now we are allowing the URL to send data to the function.
+
+Updated routes.py
+      @app.route('/')
+      @app.route('/index/<int:count>')
+      def index(count):
+          info = { 'heading': 'This is Flask index page' }
+          return render_template(
+              'index.html',
+              other='This is a kind of paragraph',
+              info=info,
+              count=count
+          )
+
+Updated index.html
+      <!DOCTYPE html> 
+      <html>
+      <head>
+          <title>Flask Page</title>
+      </head>
+      <body>
+          <h1>{{ info.heading }}</h1>
+          <p>{{ other }}</p>
+          <hr>
+          <p>{{ count }}</p>
+      </body>
+      </html>
+
+What Is <int:count> ?
+This is called a dynamic route parameter.
+      /index/<int:count>
+
+It means:
+• The URL must include a number
+• That number will be stored in variable count
+• Flask will pass it to the function
+
+Example URLs
+If user visits:
+      http://127.0.0.1:5000/index/5
+Then:
+      count = 5
+If user visits:
+      http://127.0.0.1:5000/index/100
+Then: count = 100
+
+What Does <int:count> Mean?
+It has two parts:
+Part	Meaning
+int	Only accept integers
+count	Variable name
+
+So Flask:
+Validates the value is an integer
+Converts it to Python int
+Sends it to the function
+
+If someone enters:
+/index/hello
+Flask will show 404 Not Found
+because "hello" is not an integer.
+
+Important Issue in Code
+Right now function is:
+      def index(count):
+But we also have:
+      @app.route('/')
+The problem:
+If someone visits /,
+Flask will try to call: index()
+But count is required → ERROR.
+
+Correct Way (Using Default Value)
+You must provide a default value:
+      @app.route('/')
+      @app.route('/index/<int:count>')
+      def index(count=0):
+          info = { 'heading': 'This is Flask index page' }
+          return render_template(
+              'index.html',
+              other='This is a kind of paragraph',
+              info=info,
+              count=count
+          )
+
+Now:
+URL	count value
+/          0
+/index/5   5
+This prevents errors.
+
+Full Execution Flow
+User visits:
+      /index/7
+Flask:
+Matches route
+Extracts 7
+Converts to integer
+Calls index(count=7)
+Sends count=7 to template
+
+Jinja renders:
+      <p>7</p>
+What Happens in Template?
+      <p>{{ count }}</p>
+Jinja replaces it with the number passed from Python.
+So the browser sees final HTML:
+      <p>7</p>
+Not {{ count }}.
+
+Why This Is Important
+Dynamic routes allows to build:
+• User profiles  → /user/5
+• Blog posts     → /post/23
+• Product pages  → /product/101
+• CRM records    → /client/88
+
+This is how real applications work.
+
+Mental Model
+URL → Parameter → Python → Template → Browser
+
