@@ -1,0 +1,95 @@
+Chapter 2 – Part 6: Milestone: Multi-Page Routing + url_for + Route Params + Query Strings
+
+In this milestone, the app can now do all of this:
+Serve multiple pages (/, /profile, /query, /countQuery)
+Accept route parameters like /profile/39 and /countQuery/71
+Accept query strings like /query?qryInt=2556 and /countQuery/71?qryStr=8443
+Use url_for() in templates to build links safely
+
+# 1) What each route does
+  A) Index route
+      @app.route('/')
+      @app.route('/index')
+      def index():
+          info = { 'heading': 'Flask index page' }
+          return render_template('index.html', other='This is a kind of paragraph', info=info)
+
+Meaning
+Two URLs lead to the same page: / and /index
+No input is required (no params, no query string)
+Sends info and other to the template
+Test
+      /
+      /index
+
+  B) Profile route with optional count (route parameter)
+      @app.route('/profile')
+      @app.route('/profile/<int:count>')
+      def profileRoute(count=0):
+          info = { 'heading': 'Profile page' }
+          return render_template('profile.html', other='Welcome to the new page!', info=info, count=count)
+
+Meaning
+/profile works because count has a default value 0
+/profile/39 works because <int:count> captures the number
+
+Test
+      /profile    → count = 0
+      /profile/39 → count = 39
+
+  C) Query string route (GET args)
+      @app.route('/query')
+      def queryStringRoute():
+          qry = request.args.get('qryInt', default=0, type=int)
+          info = { 'heading': 'Query page' }
+          return render_template('query.html', other='We are passing int in query string where default value is zero', info=info, qry=qry)
+
+Meaning
+This route accepts input ONLY via query string
+request.args.get() reads values after ?
+If the key is missing → default 0
+type=int forces safe conversion
+
+Test
+      /query → qry = 0
+      /query?qryInt=2556 → qry = 2556
+
+  D) Route parameter + query string together
+      @app.route('/countQuery')
+      @app.route('/countQuery/<int:count>')
+      def countQuery(count=0):
+          qry = request.args.get('qryStr', default=0, type=int)
+          info = { 'heading': 'Count and query string page' }
+          return render_template('countquery.html', other='Both Count and query string have a value of zero', info=info, count=count, qry=qry)
+
+Meaning
+count can come from the URL path: /countQuery/71
+qry can come from query string: ?qryStr=8443
+Both are optional due to defaults
+
+Test
+      /countQuery → count=0, qry=0
+      /countQuery/71 → count=71, qry=0
+      /countQuery?qryStr=8443 → count=0, qry=8443
+      /countQuery/71?qryStr=8443 → count=71, qry=8443
+
+# 2) Template navigation with url_for (professional way)
+
+Index.html menu:
+      <ul>
+        <li><a href="{{ url_for('index') }}"> Index </a></li>
+        <li><a href="{{ url_for('profileRoute', count=39) }}"> Profile </a></li>
+        <li><a href="{{ url_for('queryStringRoute', qryInt=2556) }}"> Query String </a></li>
+        <li><a href="{{ url_for('countQuery', count=71, qryStr=8443) }}"> Count & Query </a></li>
+      </ul>
+
+Why url_for() matters
+Don’t hardcode routes like /profile
+If renamed a route later, links don’t break
+url_for() also builds query strings automatically when extra args are passed
+
+Mental model (important)
+url_for('profileRoute', count=39)            → becomes /profile/39
+url_for('queryStringRoute', qryInt=2556)     → becomes /query?qryInt=2556
+url_for('countQuery', count=71, qryStr=8443) → becomes /countQuery/71?qryStr=8443
+
