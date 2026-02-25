@@ -1,0 +1,54 @@
+Chapter 2 – Part 8: Custom 404 Error Page
+
+When a user visits a URL that does not exist (example: /abc), 
+Flask normally shows its default 404 page.
+In this part, we override it with our own template.
+
+# 1) Error handler in routes.py
+      @app.errorhandler(404)
+      def error404(error):
+          return render_template('errorPage.html', pageTitle='OOPs where am i??'), 404
+
+What this means
+@app.errorhandler(404) tells Flask:
+“When a 404 happens, call this function.”
+
+Flask passes an error object into the function, so the function must accept one argument.
+, 404 ensures the HTTP response code stays 404, not 200.
+
+# 2) Create templates/errorPage.html
+    {% extends "base.html" %}
+    {% block content %}
+          <h1>This page does not exists</h1>
+          <p>I am 404- Nice to meet you</p>
+    {% endblock %}
+
+Why this is best
+It automatically gets:
+CSS, navigation menu, layout structure
+No duplicate HTML boilerplate
+
+# 3) Test your 404 page
+Run your app and visit a route that doesn’t exist:
+      /random
+      /hello123
+      /thispagedoesnotexist
+A custome page is seen, and logs shows 404 returned.
+
+Optional upgrade (shows which URL was wrong)
+To show the wrong path, pass it from Flask.
+
+Update handler:
+      from flask import request
+      
+      @app.errorhandler(404)
+      def error404(error):
+          return render_template(
+              'errorPage.html',
+              pageTitle='OOPs where am i??',
+              path=request.path
+          ), 404
+
+Then in template:
+<p>You tried to access: <strong>{{ path }}</strong></p>
+
