@@ -1,0 +1,137 @@
+Chapter 2 – Part 7: Template Inheritance with base.html
+
+Until now, every HTML file repeated the same structure:
+
+<!DOCTYPE html>, <html>, <head>, <body>
+<link rel="stylesheet"...>
+Navigation menu
+
+That repetition is not scalable.
+So we introduce template inheritance.
+
+# 1) base.html becomes the “master layout”
+templates/base.html
+      <!DOCTYPE html>
+      <html>
+      <head>
+          <title>{{ pageTitle }}</title>
+          <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+      </head>
+      <body>
+          <ul>
+              <li><a href="{{ url_for('index') }}"> Index </a></li>
+              <li><a href="{{ url_for('profileRoute', count=39) }}"> Profile </a></li>
+              <li><a href="{{ url_for('queryStringRoute', qryInt=2556) }}"> Query String </a></li>
+              <li><a href="{{ url_for('countQuery', count=71, qryStr=8443) }}"> Count & Query </a></li>
+          </ul>
+          <hr>
+          {% block content %}{% endblock %}
+      </body>
+      </html>
+
+What this means (simple)
+base.html is like a skeleton for all pages.
+It contains:
+  shared <head> (title + CSS)
+  shared navigation
+  a placeholder area called a block:
+      {% block content %}
+            ...
+      {% endblock %}
+    Every page will “inject” its own content into that block.
+
+# 2) index.html extends base.html
+templates/index.html
+      {% extends "base.html" %}
+      {% block content %}
+            <h1>{{ info.heading }}</h1>
+            <p>{{ other }}</p>
+      {% endblock %}
+  
+What this means
+extends tells Flask/Jinja:
+“Use base.html, and replace the content block with what I write here.”
+
+So the final page is:
+base.html layout + menu + css
+plus index-specific content in the content block
+
+# 3) Routes now pass pageTitle
+routes.py concept
+
+Each route passes:
+info (dictionary)
+other (string)
+pageTitle (string for browser tab title)
+
+Example:
+      return render_template(
+          'index.html',
+          other='This is a kind of paragraph',
+          info=info,
+          pageTitle='Welcome: Index Page'
+      )
+
+Why this is important
+Now the <title> tag becomes dynamic:
+<title>{{ pageTitle }}</title>
+
+So every page can have a different title, without duplicating HTML.
+Execution Flow (important mental model)
+When user visits /profile/39:
+Flask calls profileRoute(count=39)
+It renders profile.html
+profile.html extends base.html
+
+Jinja merges them:
+base layout
+profile block content
+Final HTML is sent to the browser
+
+What must be ensured now
+All templates (profile.html, query.html, countquery.html) must follow the same pattern:
+      {% extends "base.html" %}
+      {% block content %}
+          ...page content...
+      {% endblock %}
+
+If one page doesn’t extend base.html, it may lose:
+CSS
+navigation
+dynamic title
+
+Mind Tasks (to make user “work his mind”)
+Task 1 — Predict Output
+If user visits:
+/profile
+/profile/39
+What will count be on each page?
+
+Task 2 — Trace Variables
+Where is pageTitle used?
+In Python?
+In base.html?
+In the child templates?
+
+Task 3 — Debug Thinking
+If a page shows content but no menu and no CSS, what is the most likely reason?
+(Hint: it didn’t extend base.html.)
+
+Best-practice upgrades (small but professional)
+
+Upgrade 1: Provide default title
+Right now, if pageTitle is missed in a route, title becomes empty.
+Fix in base.html:
+<title>{{ pageTitle or "Flask App" }}</title>
+
+Upgrade 2: Make nav more flexible (optional)
+Instead of hardcoded count values like count=39, it can be linked to plain /profile too:
+<li><a href="{{ url_for('profileRoute') }}"> Profile </a></li>
+And keep one sample demo link separately if needed.
+
+Upgrade 3: Add a second block (optional)
+Later it may want per-page <head> additions:
+      {% block head %}
+      {% endblock %}
+Then child templates can add extra CSS/JS if needed.
+
