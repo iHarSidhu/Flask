@@ -1,0 +1,88 @@
+Chapter 3 – Part 1: Jinja For Loops and Conditional Statements
+
+Now we render multiple items dynamically using:
+      {% for %}
+      
+      {% if %}
+
+# What the Route Does
+      @app.route('/posts')
+      def showPosts():
+
+This route:
+Creates a list of dictionaries
+Sends it to the template
+Sends a boolean flag border
+
+The Data Structure
+      myPosts = [
+          {
+              'title': 'Finibus Bonorum et Malorum',
+              'body': 'Lorem ipsum...'
+          },
+          ...
+      ]
+
+This is:  List → containing → Dictionaries
+
+Very important concept.
+Later this will become:
+Database query → returning → list of model objects
+Same pattern. Different source.
+
+# posts.html Breakdown
+      {% extends "base.html" %}
+      {% block content %}
+      <h1>{{ info.heading }}</h1>
+      
+      {% for post in posts %}
+
+What this means:
+Loop over every item in posts.
+
+For each item:
+Store it temporarily in variable post
+
+Accessing Dictionary Values
+      <h2>{{ post.title }}</h2>
+      <p>{{ post.body }}</p>
+
+Jinja lets you use dot notation:
+post.title
+post.body
+Even though internally it’s a dictionary.
+
+Conditional Logic
+      {% if border %}
+        <hr>
+      {% else %}
+        ____post ends here
+      {% endif %}
+
+Because in route:
+border = False
+
+The template sees:
+border == False
+
+So it prints:
+____post ends here
+
+If changed:
+border = True
+Now it prints <hr> after every post.
+
+Full Execution Flow
+User visits /posts
+Flask creates list myPosts
+Sends it to template as posts
+Template loops through each post
+For each iteration:
+Renders title
+Renders body
+Runs conditional
+Final HTML sent to browser
+
+Mental Model
+Python list → passed to template → loop → render each item
+
