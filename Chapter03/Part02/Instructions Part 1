@@ -83,3 +83,56 @@ instead of:
       <Post object at 0x0000023>
 It helps during development.
 
+# repr usage is discussed in Instructions Part 2
+
+---
+
+Initializing SQLAlchemy (Connecting Flask to the Database)
+      from flask import Flask
+      from flask_sqlalchemy import SQLAlchemy
+
+      app = Flask(__name__)
+
+      db = SQLAlchemy(app)
+
+      from learnFlaskApp import routes, models
+
+What Is Happening Here?
+This file connects:
+Flask Application  ↔  SQLAlchemy  ↔  Database
+
+# Import SQLAlchemy
+      from flask_sqlalchemy import SQLAlchemy
+We install and import Flask-SQLAlchemy, which is an extension that:
+
+Connects Flask to a database
+Lets us define models as Python classes
+Handles database sessions automatically
+
+# Create the Flask App
+      app = Flask(__name__)
+This creates the web application instance.
+Everything — routes, models, database — connects to this app.
+
+# Initialize Database
+      db = SQLAlchemy(app)
+This line does something very important:
+Creates a SQLAlchemy object (db)
+Attaches it to the Flask app
+Makes db.Model available
+
+After this line:
+      class Post(db.Model):
+becomes valid.
+Without db = SQLAlchemy(app), models cannot exist.
+
+# Import Routes and Models
+      from learnFlaskApp import routes, models
+This must come at the bottom.
+Why?
+Because: models.py uses db
+routes.py may use models
+db must exist first
+
+If we import them at the top, Python may throw a circular import error.
+
