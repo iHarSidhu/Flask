@@ -1,0 +1,138 @@
+Chapter 3 – Part 2: Creating and Using a Real Database Model
+
+In Part 1, we looped through a static list of posts.
+Now we replace that list with a real database model using Flask-SQLAlchemy.
+This is the moment your app becomes data-driven.
+
+# First:
+In Terminal install: 
+python -m pip install flask-sqlalchemy
+
+The Model — models.py
+      from learnFlaskApp import db
+      from datetime import datetime
+      
+      class Post(db.Model):
+          __tablename__ = 'posts'
+      
+          id        = db.Column(db.Integer, primary_key=True)
+          title     = db.Column(db.String(100), nullable=False)
+          body      = db.Column(db.Text, nullable=False)
+          timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+      
+          def __repr__(self):
+              return f'<Post {self.title}>'
+
+What Is a Model?
+A model represents a database table.
+
+Think of it like:
+Python Class    → Database Table
+Class Attribute → Table Column
+Object Instance → Table Row
+
+So this class creates a table named: posts
+
+Understanding Each Field
+id
+      id = db.Column(db.Integer, primary_key=True)
+
+Unique identifier
+Automatically increments
+Every table needs a primary key
+
+title
+      title = db.Column(db.String(100), nullable=False)
+Stores text
+Max length 100 characters
+Cannot be NULL
+
+body
+      body = db.Column(db.Text, nullable=False)
+Larger text field
+No strict character limit
+Required field
+
+timestamp
+      timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+Stores creation time
+Automatically filled
+Indexed for faster sorting
+
+# Important Concept
+
+Why do we write:
+      default=datetime.utcnow
+and not:
+      default=datetime.utcnow()
+Because:
+Without parentheses → function is called when record is created
+With parentheses → function runs once at import time
+Very important difference.
+
+What Is __repr__?
+      def __repr__(self):
+          return f'<Post {self.title}>'
+
+This is used only for debugging.
+
+If you print a Post object in the shell:
+      <Post My First Post>
+
+instead of:
+      <Post object at 0x0000023>
+It helps during development.
+
+# repr usage is discussed in Instructions Part 2
+
+---
+
+Initializing SQLAlchemy (Connecting Flask to the Database)
+      from flask import Flask
+      from flask_sqlalchemy import SQLAlchemy
+
+      app = Flask(__name__)
+
+      db = SQLAlchemy(app)
+
+      from learnFlaskApp import routes, models
+
+What Is Happening Here?
+This file connects:
+Flask Application  ↔  SQLAlchemy  ↔  Database
+
+# Import SQLAlchemy
+      from flask_sqlalchemy import SQLAlchemy
+We install and import Flask-SQLAlchemy, which is an extension that:
+
+Connects Flask to a database
+Lets us define models as Python classes
+Handles database sessions automatically
+
+# Create the Flask App
+      app = Flask(__name__)
+This creates the web application instance.
+Everything — routes, models, database — connects to this app.
+
+# Initialize Database
+      db = SQLAlchemy(app)
+This line does something very important:
+Creates a SQLAlchemy object (db)
+Attaches it to the Flask app
+Makes db.Model available
+
+After this line:
+      class Post(db.Model):
+becomes valid.
+Without db = SQLAlchemy(app), models cannot exist.
+
+# Import Routes and Models
+      from learnFlaskApp import routes, models
+This must come at the bottom.
+Why?
+Because: models.py uses db
+routes.py may use models
+db must exist first
+
+If we import them at the top, Python may throw a circular import error.
+

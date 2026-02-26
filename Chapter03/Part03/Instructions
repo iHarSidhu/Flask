@@ -1,0 +1,111 @@
+Chapter 3 – Part 3: Database Configuration with Flask-Migrate
+
+In Part 2, we created models and manually created tables.
+Now we improve the setup using:
+os (for safe file paths)
+
+Flask-Migrate (for database migrations)
+
+This prepares the project for real development.
+The Code
+      import os
+      from flask import Flask
+      from flask_sqlalchemy import SQLAlchemy
+      from flask_migrate import Migrate
+      
+      app = Flask(__name__)
+      
+      basedir = os.path.abspath(os.path.dirname(__file__))
+      
+      app.config['SQLALCHEMY_DATABASE_URI'] = \
+          'sqlite:///' + os.path.join(basedir, 'site.db')
+      
+      app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+      
+      db = SQLAlchemy(app)
+      
+      migrate = Migrate(app, db)
+      
+      from learnFlaskApp import routes, models
+
+What Is Happening Here?
+# Why import os?
+      basedir = os.path.abspath(os.path.dirname(__file__))
+This gets the absolute path of the current directory.
+
+Why?
+Because instead of writing:
+sqlite:///site.db
+
+We now generate a safe absolute path.
+This prevents issues if:
+The app is run from a different working directory
+The project is deployed somewhere else
+Professional projects always use absolute paths.
+
+# Database URI Construction
+      'sqlite:///' + os.path.join(basedir, 'site.db')
+This creates something like:
+sqlite:///C:/Projects/FlaskApp/site.db
+
+Which ensures:
+The database file is always inside your project folder
+No relative path confusion
+
+# SQLAlchemy Initialization
+      db = SQLAlchemy(app)
+Same as before — connects Flask to database.
+
+# Flask-Migrate Initialization
+      migrate = Migrate(app, db)
+
+----------------------------------------------------------
+In terminal type:
+      Flask> flask db init (enter)
+      Flask> flask db migrate -m 'initial tables' (enter)
+      Flask> flask db upgrade (enter)
+
+This process creates the database and can be seen in
+learnFlaskApp folder with site.db file
+-----------------------------------------------------------
+
+Explanation Follows;
+This is the big upgrade.
+Flask-Migrate allows:
+Tracking model changes
+Updating database structure safely
+Versioning your schema
+Avoiding manual db.create_all() in production
+
+# Why Do We Need Migrations?
+Add a new column?
+Rename a field?
+Modify table structure?
+create_all() will NOT update existing tables.
+
+That’s where migrations help.
+
+How Migrations Work (Conceptually)
+Model Change
+    ↓
+Generate Migration Script
+    ↓
+Apply Migration
+    ↓
+Database Updated
+
+How to Use Flask-Migrate (Important)
+Once installed:
+Initialize migration system (only once)
+      flask db init
+Creates a migrations/ folder.
+Generate migration
+      flask db migrate -m "Initial migration"
+Flask compares:
+models current database
+And generates a script.
+
+Apply migration
+      flask db upgrade
+Now tables are created.
+
