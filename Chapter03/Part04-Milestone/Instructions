@@ -1,0 +1,88 @@
+Chapter 3 – Part 4: Querying Database Records and Rendering Them
+
+In this part, we replace the static post list with real data from the database.
+
+# Updating the Route
+      from learnFlaskApp.models import Post
+      
+      @app.route('/posts')
+      def showPosts():
+          info = { 'heading': 'For Loop on Static post' }
+          border = True
+      
+          myPosts = Post.query.all()
+      
+          return render_template(
+              'posts.html',
+              info=info,
+              pageTitle='Static Posts',
+              posts=myPosts,
+              border=border
+          )
+
+What Changed?
+Before:
+      myPosts = [ {…}, {…}, {…} ]
+Now:
+      myPosts = Post.query.all()
+
+This fetches all rows from the posts table.
+
+What Does Post.query.all() Return?
+It returns:
+      [Post object, Post object, Post object]
+
+Which behaves like a list.
+That’s why your template loop still works:
+      {% for post in posts %}
+
+The template does NOT care whether:
+posts is a Python list
+posts is a database query result
+As long as it’s iterable.
+
+That’s powerful.
+
+# Inserting Records via Flask Shell
+Ran:
+      Flask> flask shell (enter)
+Then:
+      Flask> from learnFlaskApp import db (enter)
+      Flask> from learnFlaskApp.models import Post (enter)
+
+Creating Objects
+      Flask> post1 = Post(title="Finibus Bonorum et Malorum", body="Lorem ipsum...") (enter)
+      Flask> post2 = Post(title="Accusantium Doloremque Laudantium", body="Neque porro...") (enter)
+      Flask> post3 = Post(title="Sed Quia Non Numquam Dolorem", body="Ut enim ad minima...") (enter)
+
+At this stage:
+      These are only Python objects in memory.
+Not saved yet.
+Adding to Session
+      Flask> db.session.add(post1) (enter)
+      Flask> db.session.add(post2) (enter)
+      Flask> db.session.add(post3) (enter)
+
+This prepares them for insertion.
+Committing to Database
+      Flask> db.session.commit() (enter)
+
+Now:
+SQL INSERT statements are executed
+Rows are permanently stored
+IDs are automatically assigned
+
+Verifying Insert
+      Flask> Post.query.all() (enter)
+Output:
+      [<Post Finibus Bonorum et Malorum>,
+       <Post Accusantium Doloremque Laudantium>,
+       <Post Sed Quia Non Numquam Dolorem>]
+
+Small Improvement (Professional)
+Instead of:
+      Post.query.all()
+
+Better practice:
+      Post.query.order_by(Post.timestamp.desc()).all()
+
