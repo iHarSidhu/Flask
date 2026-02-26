@@ -4,6 +4,10 @@ In Part 1, we looped through a static list of posts.
 Now we replace that list with a real database model using Flask-SQLAlchemy.
 This is the moment your app becomes data-driven.
 
+# First:
+In Terminal install: 
+python -m pip install flask-sqlalchemy
+
 The Model — models.py
       from learnFlaskApp import db
       from datetime import datetime
