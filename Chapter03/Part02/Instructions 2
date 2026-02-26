@@ -1,0 +1,41 @@
+Chapter 3 – Part 2: Practical
+
+What __repr__ Does
+In model:
+      def __repr__(self):
+          return f'<Post {self.title}>'
+
+This method is called:
+To Print the object
+The object is shown in interactive shell
+
+It appears inside a list
+
+It is for debugging — not database logic.
+
+✅ How to Test __repr__ in Flask Shell
+Step 1 — Start in terminal Flask shell
+From project root (venv activated):
+
+flask shell
+Step 2 — Import model
+type this in terminal;
+      Flask> from learnFlaskApp.models import Post (enter)
+      Flask> from learnFlaskApp import db (enter)
+
+Step 3 — Create a test object (without saving)
+      Flask> ? p = Post(title="Shell Test", body="Testing repr function") (enter)
+
+Now type:
+      p (enter)
+Should see:
+      <Post Shell Test>
+That means __repr__ worked.
+
+Step 4 — Try printing explicitly
+      print(p)
+Same output:
+      <Post Shell Test>
+
+Nothing is stored in database, only model is created and tested here.
+
