@@ -1,0 +1,125 @@
+hapter 3 – Part 5: Creating Posts Using Flask-WTF (Form → DB)
+
+In Part 4, we inserted posts using the Flask shell.
+Now we create posts from the browser using a real form.
+
+Must Install Flask-WTF
+Install — for Chapter 3 Part 5 include it:
+      python -m pip install flask-wtf
+
+# forms.py (Flask-WTF Form Class)
+from flask_wtf import FlaskForm
+      from wtforms import StringField, TextAreaField, SubmitField
+      from wtforms.validators import DataRequired
+      
+      class Posts(FlaskForm):
+          title = StringField('Title', validators=[DataRequired()])
+          body = TextAreaField('Body', validators=[DataRequired()])
+          submit = SubmitField('Submit')
+
+What this does
+Defines a reusable HTML form in Python
+Adds validation rules (DataRequired())
+Generates safe form fields automatically
+
+# newPost.html (Render the form)
+      {% extends "base.html" %}
+      {% block content %}
+      
+      <h1>{{ info.heading }}</h1>
+      
+      <form action="" method="post" novalidate>
+          {{ form.hidden_tag() }}
+      
+          {{ form.title.label }}<br>
+          {{ form.title(size=32) }}<br>
+      
+          {% for error in form.title.errors %}
+              <p style="color:red">{{ error }}</p>
+          {% endfor %}
+          <br><br>
+      
+          {{ form.body.label }}<br>
+          {{ form.body() }}<br>
+      
+          {% for error in form.body.errors %}
+              <p style="color:red">{{ error }}</p>
+          {% endfor %}
+          <br><br>
+      
+          {{ form.submit() }}
+      </form>
+
+{% endblock %}
+
+What novalidate does
+It disables browser validation so your tutorial focuses on Flask-WTF validation instead.
+
+Why hidden_tag() matters
+It includes the CSRF token, which protects against fake form submissions.
+
+So this line is required:
+{{ form.hidden_tag() }}
+
+form.title.errors and form.body.errors
+What This Code Does
+Flask-WTF collects validation errors into a list.
+
+Example: if DataRequired() fails, Flask-WTF creates an error message like:
+"This field is required."
+So:
+      {% for error in form.title.errors %}
+
+means:
+    “Loop through all error messages for the title field and display them.”
+
+routes.py (Handle GET + POST)
+      @app.route('/addpost', methods=['GET', 'POST'])
+      def addPosts():
+          info = { 'heading': 'Create a new dynamic post' }
+          form = Posts()
+      
+          if form.validate_on_submit():
+              newPost = Post(title=form.title.data, body=form.body.data)
+              db.session.add(newPost)
+              db.session.commit()
+              return redirect(url_for('showPosts'))
+      
+          return render_template('newPost.html', info=info, pageTitle='Add New Dynamic Posts', form=form)
+
+How the request flow works
+GET request (open page)
+User visits /addpost
+Flask creates form = Posts()
+Renders template with empty fields
+
+POST request (submit form)
+User fills fields and clicks submit
+validate_on_submit() checks:
+    request is POST
+    all validators pass (not empty)
+    CSRF token is valid
+If valid:
+    Create Post(...)
+    db.session.add()
+    db.session.commit()
+    redirect to /posts
+
+The most important web-dev principle:
+Post/Redirect/Get
+So refresh doesn’t re-submit the form.
+
+# The missing required piece in your __init__.py
+
+Since Flask-WTF is used, it MUST have:
+
+1) SECRET_KEY configured
+Ensures imported os and Flask:
+      import os
+      from flask import Flask
+
+2) SQLAlchemy config still exists
+Make sure this still exists in __init__.py:
+      app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'site.db')
+      app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
