@@ -1,0 +1,80 @@
+Chapter 3 – Part 6: Editing and Deleting Posts (Update)
+
+In Part 5, we created posts using a form and saved them to the database.
+Now we add:
+Edit a post: /post/<id>/edit
+Delete a post: /post/<id>/delete
+This completes CRUD.
+
+# Edit Page Template — editPost.html
+      {% extends "base.html" %}
+      {% block content %}
+      <h1>{{ info.heading }}</h1>
+      
+      <form action="" method="post" novalidate>
+          {{ form.hidden_tag() }}
+      
+          {{ form.title.label }}<br>
+          {{ form.title(size=32) }}<br>
+          {% for error in form.title.errors %}
+              <p style="color:red">{{ error }}</p>
+          {% endfor %}
+          <br><br>
+      
+          {{ form.body.label }}<br>
+          {{ form.body() }}<br>
+          {% for error in form.body.errors %}
+              <p style="color:red">{{ error }}</p>
+          {% endfor %}
+          <br><br>
+      
+          {{ form.submit(value="Update") }}
+      </form>
+      {% endblock %}
+
+What’s happening
+    This template is almost the same as “new post” form.
+    Only difference: the button label says Update.
+    form.hidden_tag() includes the CSRF token, so POST requests are protected.
+
+# Edit Route — /post/<int:post_id>/edit
+      @app.route('/post/<int:post_id>/edit', methods=['GET','POST'])
+      def editPost(post_id):
+          post = Post.query.get_or_404(post_id)
+      
+          # Preload data
+          form = Posts(obj=post)
+      
+          if form.validate_on_submit():
+              post.title = form.title.data
+              post.body  = form.body.data
+              db.session.commit()
+              return redirect(url_for('showPosts'))
+      
+          return render_template(
+              'editPost.html', form=form, post=post, pageTitle='Edit Post', info={'heading': 'Edit Post'}
+          )
+
+Step-by-step meaning
+A) Load the post safely
+    post = Post.query.get_or_404(post_id)
+    
+    If the post exists → return it
+    
+    If not → Flask automatically triggers your 404 page
+    So you never crash the app.
+
+B) Preload the form with existing DB values
+    form = Posts(obj=post)
+    This is the key feature.
+    It means:
+    On GET request, the form fields are already filled with post.title and post.body.
+    So user edits instead of typing from scratch.
+
+C) Update and commit
+    If user submits valid data:
+    update the existing post object
+    commit changes to DB
+    redirect back to posts list
+    This is proper Post/Redirect/Get.
+
